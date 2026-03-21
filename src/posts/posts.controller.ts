@@ -11,9 +11,13 @@ import {
   HttpCode,
   HttpStatus,
   ParseIntPipe,
+  UsePipes,
+  ValidationPipe,
 } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import type { Post as PostInterface } from './interfaces/post.interface';
+import { CreatePostDto } from './dto/create-post.dto';
+import { UpdatePostDto } from './dto/update-post.dto';
 
 @Controller('posts')
 export class PostsController {
@@ -39,10 +43,9 @@ export class PostsController {
 
   // POST /posts  (returns 201 Created)
   @Post()
+  @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
   @HttpCode(HttpStatus.CREATED)
-  create(
-    @Body() createPostData: Omit<PostInterface, 'id' | 'createdAt'>,
-  ): PostInterface {
+  create(@Body() createPostData: CreatePostDto): PostInterface {
     return this.postsService.create(createPostData);
   }
 
@@ -50,7 +53,7 @@ export class PostsController {
   @Put(':id')
   update(
     @Param('id', ParseIntPipe) id: number,
-    @Body() updatePostData: Partial<Omit<PostInterface, 'id' | 'createdAt'>>,
+    @Body() updatePostData: UpdatePostDto,
   ): PostInterface {
     return this.postsService.update(id, updatePostData);
   }
